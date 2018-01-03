@@ -15,7 +15,7 @@ scheme = {
   good:3,
   bad:1,
   miss:-1,
-  extra:-5
+  extra:-1
 }
 
 $.ajax({
@@ -51,6 +51,7 @@ Grade = (data)=>{
   for(var k in grade){
     mark+=grade[k]*scheme[k]
   }
+  if(grade.extra>153)mark-=grade.extra*4
   grade.mark = mark
   console.log(grade,results)
   return grade
