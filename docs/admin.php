@@ -127,7 +127,10 @@
           </tr>
         </tbody>
       </table>
-
+      <div v-if="detail.output">
+      OUTPUT:<input type="text" :value="detail.output" id="cornerJSON" readonly>
+      <button class="waves-effect waves-light btn" onclick="$('input#cornerJSON')[0].select();document.execCommand('Copy')">copy</button></div>
+      <div v-else><button class="waves-effect waves-light btn" onclick="GenerateOutput(app.detail)">generate</button></div>
     </div>
     <div class="modal-footer">
       <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
@@ -346,9 +349,9 @@
       app.compiled.splice(0, 0, temp)
     }
     else {
-      job.compile_duration = data.compile_duration
-      job.runtime_duration = data.runtime_duration
-      grade = Grade(data).grade
+      job.compile_duration = data.compile_duration;
+      job.runtime_duration = data.runtime_duration;
+      ({grade,output} = Grade(data));
       FetchUser(name, (user) => {
         if (mark in user && user.mark >= grade.mark) return
         user.mark = grade.mark
@@ -363,6 +366,7 @@
       for (let prop in job) {
         temp[prop] = job[prop]
       }
+      temp.output = output
       app.compiled.splice(0, 0, temp)
     }
     
