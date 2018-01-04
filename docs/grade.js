@@ -54,7 +54,7 @@ Grade = (data)=>{
   if(grade.extra>153)mark-=grade.extra*4
   grade.mark = mark
   console.log(grade,results)
-  return grade
+  return {grade:grade,output:results}
 }
 
 /**

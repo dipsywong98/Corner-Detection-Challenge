@@ -7,6 +7,8 @@
 <script src="https://vuejs.org/js/vue.js"></script>
 <script src="js/moment.min.js"></script>
 
+<script src="config.js"></script>
+
 <title>Scores | Corner Detection Challenge</title>
 <nav>
   <div class="nav-wrapper">
@@ -91,20 +93,8 @@
   var compiling = false
   var queue = []
 
-  var config = {
-    apiKey: "AIzaSyDeXslekRSxKlQzvdS3b908i18s1Ztg5ak",
-    authDomain: "corner-ch.firebaseapp.com",
-    databaseURL: "https://corner-ch.firebaseio.com",
-    projectId: "corner-ch",
-    storageBucket: "gs://corner-ch.appspot.com",
-    messagingSenderId: "202391887409",
 
-    rules: {
-      ".read": true,
-      ".write": true
-    }
-  };
-  firebase.initializeApp(config);
+  firebase.initializeApp(firebase_config);
   var storage = firebase.storage();
   var storageRef = storage.ref();
 
