@@ -9,6 +9,7 @@
 <script src="js/moment.min.js"></script>
 
 <script src="grade.js"></script>
+<script src="config.js"></script>
 
 <title>Admin Panel - Corner Detection Challenge</title>
 
@@ -126,7 +127,10 @@
           </tr>
         </tbody>
       </table>
-
+      <div v-if="detail.output">
+      OUTPUT:<input type="text" :value="detail.output" id="cornerJSON" readonly>
+      <button class="waves-effect waves-light btn" onclick="$('input#cornerJSON')[0].select();document.execCommand('Copy')">copy</button></div>
+      <div v-else><button class="waves-effect waves-light btn" onclick="GenerateOutput(app.detail)">generate</button></div>
     </div>
     <div class="modal-footer">
       <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
@@ -190,26 +194,10 @@
     firebase.database().ref('admin/announcements').set(JSON.parse(JSON.stringify(app.announcements)))
   }
 
-  var config = {
-    apiKey: "AIzaSyDeXslekRSxKlQzvdS3b908i18s1Ztg5ak",
-    authDomain: "corner-ch.firebaseapp.com",
-    databaseURL: "https://corner-ch.firebaseio.com",
-    projectId: "corner-ch",
-    storageBucket: "gs://corner-ch.appspot.com",
-    messagingSenderId: "202391887409",
-
-    rules: {
-      ".read": true,
-      ".write": true
-    }
-  };
-  firebase.initializeApp(config);
+  firebase.initializeApp(firebase_config);
   var storage = firebase.storage();
   var storageRef = storage.ref();
-  skygear.config({
-    'endPoint': 'https://cornerch.skygeario.com/', // trailing slash is required
-    'apiKey': '93e92fb17bce4768820d623c71ca7b6d',
-  }).then(() => {
+  skygear.config(skygear_config).then(() => {
 
     console.log('skygear container is now ready for making API calls.');
     Login()
@@ -322,56 +310,7 @@
         url: `sandbox/compile.php?name=${name}&url=${btoa(url)}`,
         success: (data) => {
           console.log('compile done', data)
-          try{
-            data = JSON.parse(data)
-          }catch(e){
-            if(data.indexOf('Maximum execution time')!=-1){
-              data = {error:'Maximum execution time exceeded'}
-            }
-            else{
-              data = {error:'unknown error'}
-              console.log('unknown error',e)
-            }
-          }
-          let index = app.compiling.findIndex(o=>o.name==name)
-          let job = app.compiling.splice(index,1)[0]
-          job.grade_time = moment()
-          if ('error' in data) {
-            console.log('error', data)
-            skygear.pubsub.publish(name, { type: 'grade', time: time, error: data.error})
-            job.error = data.error
-            let temp = {}
-            Object.assign(temp, job)
-            app.compiled.splice(0, 0, temp)
-          }
-          else {
-            job.compile_duration = data.compile_duration
-            job.runtime_duration = data.runtime_duration
-            grade = Grade(data)
-            FetchUser(name, (user) => {
-              if (user.mark && user.mark > grade.mark) return
-              user.mark = grade.mark
-              user.grade = grade
-              user.grade_time = time
-              SaveUser(name, user)
-            })
-            skygear.pubsub.publish(name, { type: 'grade', time: time, grade: grade, compile_duration:data.compile_duration,runtime_duration:data.runtime_duration })
-            job.grade = grade
-            let temp = {}
-            //Object.assign(temp,app.compiling)
-            for (let prop in job) {
-              temp[prop] = job[prop]
-            }
-            app.compiled.splice(0, 0, temp)
-          }
-          
-          console.log(app.queue)
-          console.log(app.compiled)
-          firebase.database().ref('admin/queue').set(app.queue)
-          firebase.database().ref('admin/compiled').set(JSON.stringify(app.compiled))
-          if (app.queue.length > 0) {
-            CompileSingle()
-          }
+          CompileDoneHandler(data,name,time)
         }
       })
     }).catch(function (error) {
@@ -385,5 +324,60 @@
       }
     });
   }
+
+  var CompileDoneHandler = (data,name,time)=>{
+    try{
+      data = JSON.parse(data)
+    }catch(e){
+      if(data.indexOf('Maximum execution time')!=-1){
+        data = {error:'Maximum execution time exceeded'}
+      }
+      else{
+        data = {error:'unknown error'}
+        console.log('unknown error',e)
+      }
+    }
+    let index = app.compiling.findIndex(o=>o.name==name)
+    let job = app.compiling.splice(index,1)[0]
+    job.grade_time = moment()
+    if ('error' in data) {
+      console.log('error', data)
+      skygear.pubsub.publish(name, { type: 'grade', time: time, error: data.error})
+      job.error = data.error
+      let temp = {}
+      Object.assign(temp, job)
+      app.compiled.splice(0, 0, temp)
+    }
+    else {
+      job.compile_duration = data.compile_duration;
+      job.runtime_duration = data.runtime_duration;
+      ({grade,output} = Grade(data));
+      FetchUser(name, (user) => {
+        if (mark in user && user.mark >= grade.mark) return
+        user.mark = grade.mark
+        user.grade = grade
+        user.grade_time = time
+        SaveUser(name, user)
+      })
+      skygear.pubsub.publish(name, { type: 'grade', time: time, grade: grade, compile_duration:data.compile_duration,runtime_duration:data.runtime_duration })
+      job.grade = grade
+      let temp = {}
+      //Object.assign(temp,app.compiling)
+      for (let prop in job) {
+        temp[prop] = job[prop]
+      }
+      temp.output = output
+      app.compiled.splice(0, 0, temp)
+    }
+    
+    console.log(app.queue)
+    console.log(app.compiled)
+    firebase.database().ref('admin/queue').set(app.queue)
+    firebase.database().ref('admin/compiled').set(JSON.stringify(app.compiled))
+    if (app.queue.length > 0) {
+      CompileSingle()
+    }
+  }
+
   $('.modal').modal()
 </script>

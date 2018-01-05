@@ -9,35 +9,20 @@
 <link rel="stylesheet" href="css/prism.css">
 <script src="js/prism.js"></script>
 
+<script src="config.js"></script>
+
 <title>Judging System | Corner Detection Challenge</title>
 
 <script>
-  var config = {
-    apiKey: "AIzaSyDeXslekRSxKlQzvdS3b908i18s1Ztg5ak",
-    authDomain: "corner-ch.firebaseapp.com",
-    databaseURL: "https://corner-ch.firebaseio.com",
-    projectId: "corner-ch",
-    storageBucket: "gs://corner-ch.appspot.com",
-    messagingSenderId: "202391887409",
 
-    rules: {
-      ".read": true,
-      ".write": true
-    }
-
-  };
-
-  firebase.initializeApp(config);
+  firebase.initializeApp(firebase_config);
   var database = firebase.database();
   var storage = firebase.storage();
   var storageRef = storage.ref();
   var login_user = false
   var tout = false
 
-  skygear.config({
-    'endPoint': 'https://cornerch.skygeario.com/', // trailing slash is required
-    'apiKey': '93e92fb17bce4768820d623c71ca7b6d',
-  }).then(() => {
+  skygear.config(skygear_config).then(() => {
     console.log('skygear container is now ready for making API calls.');
     skygear.pubsub.publish('online', '?')
     online_check = setTimeout(() => { Materialize.toast('the judge is not online', 4000) }, 5000)

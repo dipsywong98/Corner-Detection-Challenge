@@ -1,4 +1,5 @@
 *.bmp
 *.exe
 *.cpp
+config.js
 ans/

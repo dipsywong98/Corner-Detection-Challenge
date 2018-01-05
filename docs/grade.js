@@ -29,6 +29,8 @@ $.ajax({
 
 Grade = (data)=>{
   results = Parse(data.result)
+  output = {}
+  results.forEach(r=>{output[r.name]=r.corners})
   console.log('parsed result',results)
   grade = {
     perfect:0,
@@ -54,7 +56,7 @@ Grade = (data)=>{
   if(grade.extra>153)mark-=grade.extra*4
   grade.mark = mark
   console.log(grade,results)
-  return grade
+  return {grade:grade,output:JSON.stringify(output)}
 }
 
 /**
