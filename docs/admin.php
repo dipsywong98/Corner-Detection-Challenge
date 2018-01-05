@@ -293,6 +293,7 @@
     }
     if(i==app.queue.length)return {name:null,time:null}
     app.queue.splice(i,1)
+    firebase.database().ref('admin/queue').set(app.queue)
     return job
   }
 
@@ -317,6 +318,8 @@
       // Handle any errors
       console.log(error)
       skygear.pubsub.publish(data.name, { type: 'grade', time: time, error: 'network fail' })
+      let index = app.compiling.findIndex(o=>o.name==name)
+      let job = app.compiling.splice(index,1)[0]
       if (app.queue.length > 0) {
         CompileSingle()
       }
