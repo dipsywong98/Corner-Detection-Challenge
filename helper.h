@@ -93,7 +93,7 @@ std::vector<uint8_t> readBMP(std::string const &fname, int& w, int& h) {
  * @param  h   height of image
  * @return     1 for black pixel; 0 for white pixel
  */
-int8_t getPixel(std::vector<uint8_t> img, int x, int y, int w, int h) {
+int8_t getPixel(const std::vector<uint8_t>& img, int x, int y, int w, int h) {
   static const int8_t masks[] = "10";
   return masks[img[y*w+x]];
 }
