@@ -53,7 +53,7 @@ Grade = (data)=>{
   for(var k in grade){
     mark+=grade[k]*scheme[k]
   }
-  if(grade.extra>153)mark-=grade.extra*4
+  if(grade.extra>153)mark-=(grade.extra-153)*4
   grade.mark = mark
   console.log(grade,results)
   return {grade:grade,output:JSON.stringify(output)}

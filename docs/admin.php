@@ -160,7 +160,7 @@
 <script>
 
   var users = {}
-  var max_parallele = 4
+  var max_parallele = 1
 
   var app = new Vue({
     el: "#app",
