@@ -377,6 +377,18 @@
     console.log(app.compiled)
     firebase.database().ref('admin/queue').set(app.queue)
     firebase.database().ref('admin/compiled').set(JSON.stringify(app.compiled))
+    firebase.database().ref(`users/${name}/submits`).once('value').then(snapshot=>{
+      submits = snapshot.val().map(s=>{
+        if(s.time==time){
+          s.status = 'graded'
+          s.compile_duration = data.compile_duration
+          s.runtime_duration = data.runtime_duration
+          s.grade = grade
+        }
+        return s
+      })
+      firebase.database().ref(`users/${name}/submits`).set(submits)
+    })
     if (app.queue.length > 0) {
       CompileSingle()
     }
