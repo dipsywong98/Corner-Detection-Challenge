@@ -1,5 +1,5 @@
 <?php
-set_time_limit(200);
+set_time_limit(215);
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $error="";
   $name = test_input($_POST["file_name"]);
@@ -73,7 +73,10 @@ function compile($name){
 
 function execute($name,$arg){
   if($arg){
-    exec("$name.exe $arg",$r,$c);
+    exec("timeout.bat 2 $name.exe $arg",$r,$c);
+    if(str_contain(json_encode($r),"terminate")){
+      exit('{"name":"'.$_GET["name"].'","error":"time limit exceed"}');
+    }
   }
   else{
     exec("$name.exe",$r,$c);
@@ -97,4 +100,11 @@ function GenList(){
     array_push($list,"img/$s.bmp");
   }
   return $list;
+}
+
+function str_contain($str1,$str2){
+  if (strpos($str1, $str2) !== false) {
+      return true;
+  }
+  return false;
 }
