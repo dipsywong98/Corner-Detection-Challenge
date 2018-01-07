@@ -1,26 +1,30 @@
 #include "manager.h"
 
-Manager::Manager(int max_process):index(0),max_process(max_process){
-    srand(time(NULL));
+Manager::Manager(int max_process):index(1),max_process(max_process){
     StartProcess();
 }
 
 void Manager::StartProcess(){
-    while(index<100){
-        while(index<100&&processes.size()<max_process){
+    while(index<=100||processes.size()!=0){
+        while(index<=100&&processes.size()<max_process){
             processes.push_back(GetNextProcess(index));
+            cout<<"push"<<index<<endl;
             index++;
         }
         vector<int> to_delete;
         for(int i=0; i<processes.size();i++){
             auto&& future = processes[i];
-            auto status = future.wait_for(std::chrono::milliseconds(1));
+            auto status = future.wait_for(std::chrono::milliseconds(0));
             if( status == std::future_status::ready){
+//                cout<<"id"<<i<<"ready"<<endl;
                 future.get();
                 to_delete.push_back(i);
             }
+            else{
+//                cout<<"id"<<i<<"running"<<endl;
+            }
         }
-        for(int i=processes.size()-1; i>=0; i--){
+        for(int i=to_delete.size()-1; i>=0; i--){
             processes.erase(processes.begin()+to_delete[i]);
         }
         while(!inp.empty()){
@@ -28,8 +32,24 @@ void Manager::StartProcess(){
             inp.pop();
         }
         while(!out.empty()){
-            printf("%d done\n",out.front());
+            printf("%s done\n",out.front().c_str());
             out.pop();
         }
     }
+}
+
+inline future<int> Manager::GetNextProcess(int _index){
+    return  async(std::launch::async,[=]{
+        int t = _index%5;
+//        inp.push(_index);
+        char buff[3];
+        sprintf(buff,"%d",_index);
+        string cmd = buff;
+        while(cmd.size()<4)cmd="0"+cmd;
+        cmd = "test2.exe img/"+cmd+".bmp";
+        system(cmd.c_str());
+//        std::this_thread::sleep_for(std::chrono::seconds(2));
+//        out.push(_index);
+        return 0;
+    });
 }

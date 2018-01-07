@@ -27,18 +27,11 @@ private:
     int index;
     int max_process;
     vector<future<int>> processes;
-    queue<int> out;
+    queue<string> out;
     queue<int> inp;
     
     void StartProcess();
-    inline future<int> GetNextProcess(int _index){
-        return  async(std::launch::async,[=]{
-            inp.push(_index);
-            std::this_thread::sleep_for(std::chrono::milliseconds((rand()%5)*1000));
-            out.push(_index);
-            return 0;
-        });
-    }
+    inline future<int> GetNextProcess(int _index);
 };
 
 #endif
