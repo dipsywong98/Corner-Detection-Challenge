@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <cstring>
 
 #pragma pack(push, 1)
 struct bmp_header {
@@ -106,7 +107,7 @@ int8_t getPixel(std::vector<uint8_t> img, int x, int y, int w, int h) {
  */
 void printResult(std::string filename, int cornerc, std::vector< std::pair<int, int> > cornerv, std::string output_filename="result.txt") {
   std::fstream f;
-  f.open(output_filename, std::fstream::out | std::fstream::app); // append
+  f.open(filename.substr(4)+output_filename, std::fstream::out | std::fstream::app); // append
   f << filename << " "; // prints filename
   f << cornerc << " "; // prints corner count
   for (const auto& corner : cornerv)
