@@ -1,6 +1,6 @@
 #include "manager.h"
 
-Manager::Manager(int max_process):index(1),max_process(max_process){
+Manager::Manager(int max_process, string process_path):index(1),max_process(max_process),process_path(process_path){
     StartProcess();
 }
 
@@ -46,7 +46,7 @@ inline future<int> Manager::GetNextProcess(int _index){
         sprintf(buff,"%d",_index);
         string cmd = buff;
         while(cmd.size()<4)cmd="0"+cmd;
-        cmd = "test2.exe img/"+cmd+".bmp";
+        cmd = process_path+" img/"+cmd+".bmp";
         system(cmd.c_str());
 //        std::this_thread::sleep_for(std::chrono::seconds(2));
 //        out.push(_index);

@@ -21,11 +21,12 @@ struct Process{
 
 class Manager{
 public:
-    Manager(int max_process);
+    Manager(int max_process,  string process_path);
     
 private:
     int index;
     int max_process;
+    string process_path;
     vector<future<int>> processes;
     queue<string> out;
     queue<int> inp;
