@@ -26,7 +26,7 @@ int Manager::StartProcess(){
                 to_delete.push_back(i);
             }
             else{
-                if(time_limit&&start_time[i]+time_limit<time(NULL)){
+                if(index!=100&&time_limit&&start_time[i]+time_limit<time(NULL)){
                     cout<<"time limit exceed";
                     exit(1);
                     return 1;    
@@ -38,14 +38,15 @@ int Manager::StartProcess(){
             processes.erase(processes.begin()+to_delete[i]);
             start_time.erase(start_time.begin()+to_delete[i]);
         }
-        while(!inp.empty()){
-            printf("%d start\n",inp.front());
-            inp.pop();
-        }
-        while(!out.empty()){
-            printf("%s done\n",out.front().c_str());
-            out.pop();
-        }
+//        while(!inp.empty()){
+//            printf("%d start\n",inp.front());
+//            inp.pop();
+//        }
+//        while(!out.empty()){
+//            printf("%s done\n",out.front().c_str());
+//            out.pop();
+//        }
+        this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     return 0;
 }
