@@ -1,5 +1,7 @@
 <?php
 set_time_limit(215);
+$threads = 4;
+$timelimit = 3;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $error="";
   $name = test_input($_POST["file_name"]);
@@ -54,12 +56,10 @@ function compile($name){
   $compile_time += time();
 
   $total_run_time = 0;
-  foreach(GenList() as $k=>$v){
     $run_time = -time();
-    execute($name,$v);
+    execute($name);
     $run_time += time();
     $total_run_time += $run_time;
-  }
 
   $output = [
     "name"=>$name,
@@ -71,15 +71,12 @@ function compile($name){
   die();
 }
 
-function execute($name,$arg){
-  if($arg){
-    exec("timeout.bat 2 $name.exe $arg",$r,$c);
-    if(str_contain(json_encode($r),"terminate")){
-      exit('{"name":"'.$_GET["name"].'","error":"time limit exceed"}');
-    }
-  }
-  else{
-    exec("$name.exe",$r,$c);
+function execute($name){
+  $threads = $GLOBALS["threads"];
+  $timelimit = $GLOBALS["timelimit"];
+  exec("tasker $threads $name.exe $timelimit",$r,$c);
+  if(str_contain(json_encode($r),"time limit exceed")){
+    exit('{"name":"'.$name.'","error":"time limit exceed"}');
   }
   if($c!=0)exit('{"name":"'.$_GET["name"].'","error":"run time error with exit code '.$c.'"}');
   return $r;
@@ -90,17 +87,17 @@ function LoadFile($name){
   return fread($myfile,filesize("$name.exe.txt"));
 }
 
-function GenList(){
-  $list = [];
-  for($i=1; $i<=100; $i++){
-    $s = "0$i";
-    while(strlen($s)<4){
-      $s = "0".$s;
-    }
-    array_push($list,"img/$s.bmp");
-  }
-  return $list;
-}
+// function GenList(){
+//   $list = [];
+//   for($i=1; $i<=100; $i++){
+//     $s = "0$i";
+//     while(strlen($s)<4){
+//       $s = "0".$s;
+//     }
+//     array_push($list,"img/$s.bmp");
+//   }
+//   return $list;
+// }
 
 function str_contain($str1,$str2){
   if (strpos($str1, $str2) !== false) {

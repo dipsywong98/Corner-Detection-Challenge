@@ -47,7 +47,7 @@
       <tr v-for="(user,k) in users">
         <td>{{k+1}}</td>
         <td>{{user.username}}</td>
-        <td>{{moment(user.grade_time).format('HH:mm:ss')}}</td>
+        <td>{{moment(user.grade_time).format('DD MMM dd HH:mm:ss')}}</td>
         <td>{{user.mark}}</td>
         <td>{{user.grade.perfect}}</td>
         <td>{{user.grade.great}}</td>
@@ -106,7 +106,28 @@
     for (k in _users) {
       users.push(_users[k])
     }
-    app.users = users.filter(u => ('grade' in u)).sort((a, b) => moment(b.grade_time).isBefore(a.grade_time)).sort((a, b) => b.mark - a.mark)
+    filtered_user = users.filter(u => {
+      if(!('grade' in u))return false
+      else return u.submits.reduce((pre,s)=>{
+        if(pre===true)return true
+        return ('grade' in s)&&(s.grade.miss!=153)
+      },false)
+    })
+    app.users = filtered_user.map(u=>{
+      best_submit = u.submits.filter(s=>('grade' in s)&&(s.grade.miss!=153)).sort((sa,sb)=>{
+        return moment(sa.time).isAfter(sb.time)
+      }).sort((sa,sb)=>{
+        return sa.grade.mark<sb.grade.mark
+      })[0]
+      u.mark = best_submit.grade.mark
+      u.grade = best_submit.grade
+      u.time = best_submit.time
+      return u
+    }).sort((ua,ub)=>{
+      return moment(ua.time).isAfter(ub.time)
+    }).sort((ua,ub)=>{
+      return ua.grade.mark<ub.grade.mark
+    })
   }, function (errorObject) {
     console.log("The read failed: " + errorObject.code);
   });

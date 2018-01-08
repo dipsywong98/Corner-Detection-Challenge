@@ -73,7 +73,7 @@
     })
 
     ref = firebase.database().ref("users/" + name)
-    ref.on("value", function (snapshot) {
+    ref.once("value").then(function (snapshot) {
       console.log(snapshot.val());
       app.submits = snapshot.val().submits || []
     }, function (errorObject) {
@@ -90,12 +90,6 @@
       let name = login_user
       let cppfile = $('input#file')[0].files[0]
 
-      if(tout)clearTimeout(tout)
-      tout = setTimeout(() => {
-        alert('cannot connect to admin')
-        clearTimeout(tout)
-      }, 5000);
-
       let time = new Date()
       time = time.toISOString()
       var fileRef = storageRef.child(`files/${name}/${btoa(time)}.cpp`);
@@ -103,7 +97,11 @@
         fileRef.put(cppfile).then(function (snapshot) {
 
           console.log('Uploaded a blob or file!');
-          skygear.pubsub.publish('upload', { name: name, time: time })
+          firebase.database().ref('admin/queue').once('value').then(snapshot=>{
+            queue = snapshot.val()||[]
+            queue.push({ name: name, time: time })
+            firebase.database().ref('admin/queue').set(queue)
+          })
           app.submits.splice(0, 0, { status: 'pending', time: time })
           firebase.database().ref('users/' + name).update({ submits: app.submits })
         }, function (error) {
@@ -124,14 +122,14 @@
     if (data == "received") {
       clearTimeout(tout)
       console.log('well received')
-      Materialize.toast('You Program is Recieved', 4000)
+      Materialize.toast('You Program is Received', 4000)
     }
     else if (data.type == 'grade') {
       index = app.submits.findIndex(o => o.time == data.time)
       if (data.error) {
         Materialize.toast('Your Program have ' + data.error, 4000)
-        app.submits[index].status = 'error'
-        app.submits[index].error = data.error
+        // app.submits[index].status = 'error'
+        // app.submits[index].error = data.error
       }
       else {
         Materialize.toast('You Program is Graded', 4000)

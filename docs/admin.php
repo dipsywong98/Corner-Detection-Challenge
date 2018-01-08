@@ -202,29 +202,12 @@
     console.log('skygear container is now ready for making API calls.');
     Login()
     FetchAll()
-    skygear.pubsub.on('upload', (name) => {
-      UploadListener(name)
-    });
     skygear.pubsub.on('online', (name) => {
       if (name == "?")
         skygear.pubsub.publish('online', 'Y')
     });
     skygear.pubsub.publish('online', 'Y')
   })
-
-  var UploadListener = (obj) => {
-    console.log('recieved upload', obj)
-    Push(obj)
-    skygear.pubsub.publish(obj.name, "received")
-  }
-
-  var Push = (item) => {
-    app.queue.push(item)
-    firebase.database().ref('admin/queue').set(app.queue)
-    if (app.compiling.length<max_parallele) {
-      CompileSingle()
-    }
-  }
 
   var Login = () => {
     let name = 'Leslie'
@@ -248,8 +231,8 @@
       console.log("The read failed: " + errorObject.code);
     });
     ref = firebase.database().ref("admin/queue")
-    ref.once("value").then(function (snapshot) {
-      console.log(snapshot.val());
+    ref.on("value",function (snapshot) {
+      console.log(snapshot.val()&&app.compiling.length<max_parallele);
       app.queue = snapshot.val() || []
       if (app.queue.length > 0) {
         CompileSingle()
@@ -377,6 +360,18 @@
     console.log(app.compiled)
     firebase.database().ref('admin/queue').set(app.queue)
     firebase.database().ref('admin/compiled').set(JSON.stringify(app.compiled))
+    firebase.database().ref(`users/${name}/submits`).once('value').then(snapshot=>{
+      submits = snapshot.val().map(s=>{
+        if(s.time==time){
+          s.status = 'graded'
+          s.compile_duration = data.compile_duration
+          s.runtime_duration = data.runtime_duration
+          s.grade = grade
+        }
+        return s
+      })
+      firebase.database().ref(`users/${name}/submits`).set(submits)
+    })
     if (app.queue.length > 0) {
       CompileSingle()
     }

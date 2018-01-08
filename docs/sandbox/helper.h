@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <cstring>
 
 #pragma pack(push, 1)
 struct bmp_header {
