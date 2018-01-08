@@ -97,6 +97,7 @@
         fileRef.put(cppfile).then(function (snapshot) {
 
           console.log('Uploaded a blob or file!');
+          skygear.pubsub.publish('upload', { name: name, time: time })
           firebase.database().ref('admin/queue').once('value').then(snapshot=>{
             queue = snapshot.val()||[]
             queue.push({ name: name, time: time })
@@ -128,8 +129,8 @@
       index = app.submits.findIndex(o => o.time == data.time)
       if (data.error) {
         Materialize.toast('Your Program have ' + data.error, 4000)
-        // app.submits[index].status = 'error'
-        // app.submits[index].error = data.error
+        app.submits[index].status = 'error'
+        app.submits[index].error = data.error
       }
       else {
         Materialize.toast('You Program is Graded', 4000)

@@ -202,6 +202,9 @@
     console.log('skygear container is now ready for making API calls.');
     Login()
     FetchAll()
+    skygear.pubsub.on('upload', (obj) => {
+      skygear.pubsub.publish(obj.name, "received")
+    });
     skygear.pubsub.on('online', (name) => {
       if (name == "?")
         skygear.pubsub.publish('online', 'Y')
@@ -294,21 +297,38 @@
         url: `sandbox/compile.php?name=${name}&url=${btoa(url)}`,
         success: (data) => {
           console.log('compile done', data)
-          CompileDoneHandler(data,name,time)
+          try{
+            CompileDoneHandler(data,name,time)
+          }
+          catch(error){
+            ErrorHandler(error, name, time)
+          }
         }
       })
     }).catch(function (error) {
       // Handle any errors
-      console.log(error)
-      skygear.pubsub.publish(data.name, { type: 'grade', time: time, error: 'network fail' })
+      ErrorHandler(error, name, time)
+    });
+  }
+
+  var ErrorHandler = (error,name,time)=>{
+    console.log(error)
+      skygear.pubsub.publish(data.name, { type: 'grade', time: time, error: 'fail' })
       let index = app.compiling.findIndex(o=>o.name==name)
       let job = app.compiling.splice(index,1)[0]
+      firebase.database().ref(`users/${name}/submits`).once('value').then(snapshot=>{
+        submits = snapshot.val().map(s=>{
+          if(s.time==time){
+            s.status = 'error'
+            s.error = 'fail'
+          }
+          return s
+        })
+        firebase.database().ref(`users/${name}/submits`).set(submits)
+      })
       if (app.queue.length > 0) {
         CompileSingle()
       }
-      else {
-      }
-    });
   }
 
   var CompileDoneHandler = (data,name,time)=>{
@@ -363,10 +383,16 @@
     firebase.database().ref(`users/${name}/submits`).once('value').then(snapshot=>{
       submits = snapshot.val().map(s=>{
         if(s.time==time){
-          s.status = 'graded'
-          s.compile_duration = data.compile_duration
-          s.runtime_duration = data.runtime_duration
-          s.grade = grade
+          if('error' in data){
+            s.status = 'error'
+            s.error = job.error
+          }
+          else{
+            s.status = 'graded'
+            s.grade = job.grade
+            s.compile_duration = data.compile_duration
+            s.runtime_duration = data.runtime_duration
+          }
         }
         return s
       })
