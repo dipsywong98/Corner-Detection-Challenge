@@ -11,6 +11,7 @@
 #include <string>
 #include <exception>
 #include <queue>
+//#include <map>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ struct Process{
 class Manager{
 public:
     Manager(int max_process,  string process_path);
+    int StartProcess();
     
 private:
     int index;
@@ -30,8 +32,8 @@ private:
     vector<future<int>> processes;
     queue<string> out;
     queue<int> inp;
+//    map<int,int> start_time;
     
-    void StartProcess();
     inline future<int> GetNextProcess(int _index);
 };
 

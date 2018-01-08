@@ -1,10 +1,9 @@
 #include "manager.h"
 
 Manager::Manager(int max_process, string process_path):index(1),max_process(max_process),process_path(process_path){
-    StartProcess();
 }
 
-void Manager::StartProcess(){
+int Manager::StartProcess(){
     while(index<=100||processes.size()!=0){
         while(index<=100&&processes.size()<max_process){
             processes.push_back(GetNextProcess(index));
@@ -17,7 +16,11 @@ void Manager::StartProcess(){
             auto status = future.wait_for(std::chrono::milliseconds(0));
             if( status == std::future_status::ready){
 //                cout<<"id"<<i<<"ready"<<endl;
-                future.get();
+                int flag = future.get();
+                if(flag){
+                    for(int j=i; j<processes.size();j++)processes[j].get();
+                    return flag;
+                } 
                 to_delete.push_back(i);
             }
             else{
@@ -36,6 +39,7 @@ void Manager::StartProcess(){
             out.pop();
         }
     }
+    return 0;
 }
 
 inline future<int> Manager::GetNextProcess(int _index){
@@ -47,9 +51,9 @@ inline future<int> Manager::GetNextProcess(int _index){
         string cmd = buff;
         while(cmd.size()<4)cmd="0"+cmd;
         cmd = process_path+" img/"+cmd+".bmp";
-        system(cmd.c_str());
+        
 //        std::this_thread::sleep_for(std::chrono::seconds(2));
 //        out.push(_index);
-        return 0;
+        return system(cmd.c_str());;
     });
 }
