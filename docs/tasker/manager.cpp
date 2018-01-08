@@ -1,11 +1,12 @@
 #include "manager.h"
 
-Manager::Manager(int max_process, string process_path):index(1),max_process(max_process),process_path(process_path){
+Manager::Manager(int max_process, string process_path, int time_limit):index(1),max_process(max_process),time_limit(time_limit),process_path(process_path){
 }
 
 int Manager::StartProcess(){
     while(index<=100||processes.size()!=0){
         while(index<=100&&processes.size()<max_process){
+            start_time.push_back(time(NULL));
             processes.push_back(GetNextProcess(index));
             cout<<"push"<<index<<endl;
             index++;
@@ -18,17 +19,24 @@ int Manager::StartProcess(){
 //                cout<<"id"<<i<<"ready"<<endl;
                 int flag = future.get();
                 if(flag){
+                    cout<<"run time error";
                     for(int j=i; j<processes.size();j++)processes[j].get();
                     return flag;
                 } 
                 to_delete.push_back(i);
             }
             else{
+                if(time_limit&&start_time[i]+time_limit<time(NULL)){
+                    cout<<"time limit exceed";
+                    exit(1);
+                    return 1;    
+                }
 //                cout<<"id"<<i<<"running"<<endl;
             }
         }
         for(int i=to_delete.size()-1; i>=0; i--){
             processes.erase(processes.begin()+to_delete[i]);
+            start_time.erase(start_time.begin()+to_delete[i]);
         }
         while(!inp.empty()){
             printf("%d start\n",inp.front());
