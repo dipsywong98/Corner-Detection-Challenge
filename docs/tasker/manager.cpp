@@ -31,6 +31,9 @@ int Manager::StartProcess(){
                     exit(1);
                     return 1;    
                 }
+                else if(index == 100){
+                    future.get();
+                }
 //                cout<<"id"<<i<<"running"<<endl;
             }
         }

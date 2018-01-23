@@ -1,6 +1,6 @@
 <?php
 set_time_limit(215);
-$threads = 4;
+$threads = 1;
 $timelimit = 3;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $error="";

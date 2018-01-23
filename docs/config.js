@@ -14,9 +14,11 @@ if(run_dev===true){
     'endPoint': 'https://cornerchdev.skygeario.com/', // trailing slash is required
     'apiKey': 'd4f2c124ad7843f4af8f4cb7b51b9db7',
   }
+
+  console.log('running DEV')
 }
 else{
-  var config = {
+  var firebase_config = {
     apiKey: "AIzaSyDeXslekRSxKlQzvdS3b908i18s1Ztg5ak",
     authDomain: "corner-ch.firebaseapp.com",
     databaseURL: "https://corner-ch.firebaseio.com",
