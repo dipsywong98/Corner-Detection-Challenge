@@ -93,7 +93,7 @@ std::vector<uint8_t> readBMP(std::string const &fname, int& w, int& h) {
  * @param  h   height of image
  * @return     1 for black pixel; 0 for white pixel
  */
-int8_t getPixel(std::vector<uint8_t> img, int x, int y, int w, int h) {
+int8_t getPixel(const std::vector<uint8_t>& img, int x, int y, int w, int h) {
   static const int8_t masks[] = "10";
   return masks[img[y*w+x]];
 }
@@ -104,7 +104,7 @@ int8_t getPixel(std::vector<uint8_t> img, int x, int y, int w, int h) {
  * @param cornerc  Corner count
  * @param cornerv  Corner coordinates vector
  */
-void printResult(std::string filename, int cornerc, std::vector< std::pair<int, int> > cornerv, std::string output_filename="result.txt") {
+void printResult(const std::string& filename, const int& cornerc, const std::vector< std::pair<int, int> >& cornerv, const std::string& output_filename="result.txt") {
   std::fstream f;
   f.open(output_filename, std::fstream::out | std::fstream::app); // append
   f << filename << " "; // prints filename
