@@ -1,0 +1,176 @@
+<script src="https://code.skygear.io/js/polyfill/latest/polyfill.min.js"></script>
+<script src="https://code.skygear.io/js/skygear/latest/skygear.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+<script src="https://vuejs.org/js/vue.js"></script>
+<script src="js/moment.min.js"></script>
+<link rel="stylesheet" href="css/prism.css">
+<script src="js/prism.js"></script>
+
+<title>
+  Result | Corner Detection Challenge
+</title>
+
+<div id="app">
+  <table class="striped">
+    <thead>
+      <tr>
+        <th>rank</th>
+        <th>name</th>
+        <th>time</th>
+        <th>mark</th>
+        <th>perfect</th>
+        <th>great</th>
+        <th>good</th>
+        <th>bad</th>
+        <th>miss</th>
+        <th>extra</th>
+        <th>detail</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="(user,k) in users">
+        <td>{{k+1}}</td>
+        <td>{{user.username}}</td>
+        <td>{{moment(user.grade_time).format('ddd YYYY-MM-DD HH:mm:ss')}}</td>
+        <td>{{user.mark}}</td>
+        <td>{{user.grade.perfect}}</td>
+        <td>{{user.grade.great}}</td>
+        <td>{{user.grade.good}}</td>
+        <td>{{user.grade.bad}}</td>
+        <td>{{user.grade.miss}}</td>
+        <td>{{user.grade.extra}}</td>
+        <td>
+          <button class="btn" :onclick="`Download(${k})`">view detail</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div id="source_code" class="modal" width="90%" max-height="90%">
+  <div class="modal-content">
+    <p>OUTPUT</p>
+    <input type="text" value="output" id="cornerJSON" readonly>
+    <button class="waves-effect waves-light btn" onclick="$('input#cornerJSON')[0].select();document.execCommand('Copy')">copy</button>
+    <button class="waves-effect waves-light btn" onclick="Save()">Save</button>
+    <pre><code class="language-cpp">A bunch of text</code></pre>
+    <iframe width="100%" height="100%"></iframe>
+  </div>
+
+  
+
+</div>
+<div class="modal-footer">
+  <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+</div>
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {
+      users: [],
+      compiled: [],
+      output: false
+    },
+    methods: {
+      moment: moment
+    }
+  })
+  var compiling = false
+  var queue = []
+  var config = {
+    apiKey: "AIzaSyDeXslekRSxKlQzvdS3b908i18s1Ztg5ak",
+    authDomain: "corner-ch.firebaseapp.com",
+    databaseURL: "https://corner-ch.firebaseio.com",
+    projectId: "corner-ch",
+    storageBucket: "gs://corner-ch.appspot.com",
+    messagingSenderId: "202391887409"
+  };
+  firebase.initializeApp(config);
+  var storage = firebase.storage();
+  var storageRef = storage.ref();
+  ref = firebase.database().ref("users")
+  firebase.database().ref("admin/compiled").once('value').then((snapshot) => {
+    app.compiled = JSON.parse(snapshot.val())
+  })
+  ref.on("value", function (snapshot) {
+    console.log(snapshot.val());
+    let _users = snapshot.val()
+    users = []
+    for (k in _users) {
+      users.push(_users[k])
+    }
+    app.users = users.filter(u => ('grade' in u)).sort((a, b) => moment(b.grade_time).isBefore(a.grade_time)).sort((a, b) => b.mark - a.mark)
+  }, function (errorObject) {
+    console.log("The read failed: " + errorObject.code);
+  });
+  firebase.database().ref("admin/announcements").on("value", (snapshot) => {
+    app.announcements = snapshot.val()
+  })
+
+  Download = (k) => {
+    let user = app.users[k]
+    let time = user.grade_time
+    if (!('cpp' in user)) {
+      let st = firebase.storage().ref(`files/${user.username}/${btoa(time)}.cpp`).getDownloadURL().then(function (url) {
+        console.log('crawling', url, btoa(url))
+        $.ajax({
+          url: `http://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
+          success: (data) => {
+            user.cpp = data
+            $('code')[0].innerHTML = data
+            console.log(data)
+            Prism.highlightAll()
+            $('#source_code').modal('open')
+
+          }
+        })
+      })
+    }
+    else {
+      let data = user.cpp
+      $('code')[0].innerHTML = data
+      console.log(data)
+      Prism.highlightAll()
+      $('#source_code').modal('open')
+    }
+    Save = ()=>{download(user.username+'.cpp',user.cpp)}
+    GetOutput(k)
+  }
+
+  GetOutput = (k) => {
+    let user = app.users[k]
+    if (!(user.output)) {
+      for (let i = 0; i < app.compiled.length; i++) {
+        let c = app.compiled[i]
+        if (c.grade.mark == user.grade.mark) {
+          user.output = c.output
+          console.log(c)
+          break
+        }
+      }
+    }
+    if ('output' in user){
+      app.output = user.output
+      $('input#cornerJSON')[0].value = user.output
+      $('iframe')[0].src = `./sandbox/corner.html?points=${user.output}`
+    }
+  }
+
+  function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+  }
+
+  $('.modal').modal()
+</script>

@@ -32,7 +32,9 @@
 
 <script>
 
-  points = {}
+  var url_string = window.location.href
+  var url = new URL(url_string);
+  var points = JSON.parse(url.searchParams.get("points"))||{};
 
   Reset = ()=>{
     points[src]=[];
