@@ -58,12 +58,9 @@
     <pre><code class="language-cpp">A bunch of text</code></pre>
     <iframe width="100%" height="100%"></iframe>
   </div>
-
-  
-
-</div>
-<div class="modal-footer">
-  <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+  <div class="modal-footer">
+    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Close</a>
+  </div>
 </div>
 
 <script>
@@ -113,11 +110,12 @@
   Download = (k) => {
     let user = app.users[k]
     let time = user.grade_time
+    let protocol = (location.protocol.match(/https/g) ? 'https' : 'http')
     if (!('cpp' in user)) {
       let st = firebase.storage().ref(`files/${user.username}/${btoa(time)}.cpp`).getDownloadURL().then(function (url) {
         console.log('crawling', url, btoa(url))
         $.ajax({
-          url: `${location.protocol}://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
+          url: `${protocol}://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
           success: (data) => {
             user.cpp = data
             $('code')[0].innerHTML = data

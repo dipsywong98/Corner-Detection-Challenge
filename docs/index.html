@@ -148,11 +148,12 @@
   }
 
   ShowCpp = (base64) => {
-    console.log('showcpp')
+    console.log('showcpp')    
+    let protocol = (location.protocol.match(/https/g) ? 'https' : 'http')
     storageRef.child(`files/${login_user}/${base64}.cpp`).getDownloadURL().then(function (url) {
       console.log('crawling', url, btoa(url))
       $.ajax({
-        url: `${location.protocol}://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
+        url: `${protocol}://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
         success: (data) => {
           $('code')[0].innerHTML = data
           console.log(data)
