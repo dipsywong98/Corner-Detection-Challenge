@@ -152,7 +152,7 @@
     storageRef.child(`files/${login_user}/${base64}.cpp`).getDownloadURL().then(function (url) {
       console.log('crawling', url, btoa(url))
       $.ajax({
-        url: `http://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
+        url: `${location.protocol}://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
         success: (data) => {
           $('code')[0].innerHTML = data
           console.log(data)
@@ -172,6 +172,9 @@
       <ul id="nav-mobile" class="right hide-on-med-and-down">
         <li>
           <a href="scores.html">Scores</a>
+        </li>
+        <li>
+          <a href="result.html">Result</a>
         </li>
         <li>
           <a onclick="$('#announcements').modal('open')">Annoucements</a>

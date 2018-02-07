@@ -117,7 +117,7 @@
       let st = firebase.storage().ref(`files/${user.username}/${btoa(time)}.cpp`).getDownloadURL().then(function (url) {
         console.log('crawling', url, btoa(url))
         $.ajax({
-          url: `http://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
+          url: `${location.protocol}://ycwongal.student.ust.hk/crawler.php?url=${btoa(url)}`,
           success: (data) => {
             user.cpp = data
             $('code')[0].innerHTML = data
