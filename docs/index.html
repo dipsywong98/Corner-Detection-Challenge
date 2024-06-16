@@ -4,7 +4,7 @@
 <script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
-<script src="https://vuejs.org/js/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
 <script src="js/moment.min.js"></script>
 <link rel="stylesheet" href="css/prism.css">
 <script src="js/prism.js"></script>
@@ -22,51 +22,51 @@
   var login_user = false
   var tout = false
 
-  skygear.config(skygear_config).then(() => {
-    console.log('skygear container is now ready for making API calls.');
-    skygear.pubsub.publish('online', '?')
-    online_check = setTimeout(() => { Materialize.toast('the judge is not online', 4000) }, 5000)
-    skygear.pubsub.on('online', (name) => {
-      if (name == 'Y') {
-        Materialize.toast('the judge is online', 4000)
-        clearTimeout(online_check)
-      }
-    });
-    skygear.pubsub.on('announce', (data) => {
-      app.announcements.push({ time: moment, announce: data })
-      alert(data)
-    });
-  })
+  // skygear.config(skygear_config).then(() => {
+  //   console.log('skygear container is now ready for making API calls.');
+  //   skygear.pubsub.publish('online', '?')
+  //   online_check = setTimeout(() => { Materialize.toast('the judge is not online', 4000) }, 5000)
+  //   skygear.pubsub.on('online', (name) => {
+  //     if (name == 'Y') {
+  //       Materialize.toast('the judge is online', 4000)
+  //       clearTimeout(online_check)
+  //     }
+  //   });
+  //   skygear.pubsub.on('announce', (data) => {
+  //     app.announcements.push({ time: moment, announce: data })
+  //     alert(data)
+  //   });
+  // })
 
   var Login = (callback = null) => {
     let name = $('input#name')[0].value
     let pw = $('input#password')[0].value
     console.log('hi')
-    skygear.auth.signupWithUsername(name, pw)
-      .then((user) => {
+    // skygear.auth.signupWithUsername(name, pw)
+    //   .then((user) => {
         console.log(user)
         LoginSuccess(name, callback)
         firebase.database().ref('users/' + name).set({
           username: name
         })
-      },
-      (error) => {
-        skygear.auth.loginWithUsername(name, pw)
-          .then((user) => {
-            console.log(user)
-            LoginSuccess(name, callback)
-          }, (error) => {
-            console.error(error);
-            Materialize.toast('Login Fail', 4000)
-          })
-      })
+      // },
+      // (error) => {
+      //   skygear.auth.loginWithUsername(name, pw)
+      //     .then((user) => {
+      //       console.log(user)
+      //       LoginSuccess(name, callback)
+      //     }, (error) => {
+      //       console.error(error);
+      //       Materialize.toast('Login Fail', 4000)
+      //     })
+      // })
   }
 
   var LoginSuccess = (name, callback) => {
     Materialize.toast(`Login Success`, 4000)
-    skygear.pubsub.on(name, (data) => {
-      FeedbackListener(data)
-    });
+    // skygear.pubsub.on(name, (data) => {
+    //   FeedbackListener(data)
+    // });
     login_user = name
     firebase.database().ref('users/' + name).update({
       username: name
@@ -97,7 +97,7 @@
         fileRef.put(cppfile).then(function (snapshot) {
 
           console.log('Uploaded a blob or file!');
-          skygear.pubsub.publish('upload', { name: name, time: time })
+          // skygear.pubsub.publish('upload', { name: name, time: time })
           firebase.database().ref('admin/queue').once('value').then(snapshot=>{
             queue = snapshot.val()||[]
             queue.push({ name: name, time: time })
